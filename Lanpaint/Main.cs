@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using Lanchat.ClientCore;
 using Lanchat.Core.Network;
 using Lanpaint.Handlers;
@@ -19,6 +18,8 @@ namespace Lanpaint
         private SpriteBatch _spriteBatch;
         private static P2P _network;
         private Config _config;
+        private readonly Color _color = RandomColor.GetColor();
+
 
         public static List<Pixel> Pixels { get; } = new();
 
@@ -39,7 +40,7 @@ namespace Lanpaint
             _config.DebugMode = true;
             _config.ConnectToSaved = false;
             _config.NodesDetection = false;
-            
+
             var rsaDatabase = new RsaDatabase();
             _network = new P2P(
                 _config,
@@ -82,7 +83,7 @@ namespace Lanpaint
             _spriteBatch.End();
             base.Draw(gameTime);
         }
-        
+
         private void AddPixel()
         {
             var mouseState = Mouse.GetState();
@@ -95,7 +96,8 @@ namespace Lanpaint
             var draw = new Pixel
             {
                 X = mouseState.X,
-                Y = mouseState.Y
+                Y = mouseState.Y,
+                Color = _color
             };
 
             Pixels.Add(draw);
@@ -106,7 +108,7 @@ namespace Lanpaint
         {
             var rect = new Texture2D(_graphics.GraphicsDevice, 5, 5);
             var data = new Color[5 * 5];
-            for (var i = 0; i < data.Length; ++i) data[i] = Color.Black;
+            for (var i = 0; i < data.Length; ++i) data[i] = pixel.Color;
             rect.SetData(data);
             var position = new Vector2(pixel.X, pixel.Y);
             _spriteBatch.Draw(rect, position, Color.White);

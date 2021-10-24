@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Lanchat.ClientCore;
@@ -20,9 +21,9 @@ namespace Lanpaint
         private Config _config;
         private readonly Color _color = RandomColor.GetColor();
 
-
         public static List<Pixel> Pixels { get; } = new();
-
+        public DebugLog DebugLog { get; private set; }
+        
         public Main()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -35,7 +36,7 @@ namespace Lanpaint
             _graphics.PreferredBackBufferWidth = 1000;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
-
+            
             _config = Storage.LoadConfig();
             _config.DebugMode = true;
             _config.ConnectToSaved = false;
@@ -54,7 +55,10 @@ namespace Lanpaint
 
         protected override void LoadContent()
         {
+            var font = Content.Load<SpriteFont>("DefaultFont");
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            DebugLog = new DebugLog(_spriteBatch, font);
+            Trace.Listeners.Add(new TraceListener(DebugLog));
         }
 
         protected override void Update(GameTime gameTime)
@@ -80,6 +84,7 @@ namespace Lanpaint
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             Pixels.ToList().ForEach(DrawPixel);
+            DebugLog.DrawLog();
             _spriteBatch.End();
             base.Draw(gameTime);
         }

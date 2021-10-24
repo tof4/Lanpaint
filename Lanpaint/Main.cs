@@ -15,21 +15,22 @@ namespace Lanpaint
 {
     public class Main : Game
     {
-        private readonly GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
         private static P2P _network;
-        private Config _config;
         private readonly Color _color = RandomColor.GetColor();
+        private readonly GraphicsDeviceManager _graphics;
+        private KeyboardInput _keyboardInput;
+        private Config _config;
+        private DebugLog _debugLog;
+        private SpriteBatch _spriteBatch;
 
-        public static List<Pixel> Pixels { get; } = new();
-        public DebugLog DebugLog { get; private set; }
-        
         public Main()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
+
+        public static List<Pixel> Pixels { get; } = new();
 
         protected override void Initialize()
         {
@@ -50,6 +51,7 @@ namespace Lanpaint
                 new[] { typeof(PixelHandler) }
             );
 
+            _keyboardInput = new KeyboardInput();
             base.Initialize();
         }
 
@@ -57,22 +59,26 @@ namespace Lanpaint
         {
             var font = Content.Load<SpriteFont>("DefaultFont");
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            DebugLog = new DebugLog(_spriteBatch, font);
-            Trace.Listeners.Add(new TraceListener(DebugLog));
+            _debugLog = new DebugLog(_spriteBatch, font);
+            Trace.Listeners.Add(new TraceListener(_debugLog));
         }
 
         protected override void Update(GameTime gameTime)
         {
-            var keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Keys.F1))
+            _keyboardInput.UpdateState();
+            if (_keyboardInput.CheckKey(Keys.F1))
             {
                 _network.Start();
             }
-            else if (keyboardState.IsKeyDown(Keys.F2))
+            else if (_keyboardInput.CheckKey(Keys.F2))
             {
                 _config.StartServer = false;
                 _network.Start();
                 _network.Connect(IPAddress.Loopback);
+            }
+            else if (_keyboardInput.CheckKey(Keys.F3))
+            {
+                _debugLog.ShowLog = !_debugLog.ShowLog;
             }
 
             AddPixel();
@@ -84,7 +90,7 @@ namespace Lanpaint
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             Pixels.ToList().ForEach(DrawPixel);
-            DebugLog.DrawLog();
+            _debugLog.DrawLog();
             _spriteBatch.End();
             base.Draw(gameTime);
         }

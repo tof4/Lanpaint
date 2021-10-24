@@ -10,6 +10,8 @@ namespace Lanpaint
         private readonly SpriteBatch _spriteBatch;
         private readonly SpriteFont _font;
 
+        public bool ShowLog { get; set; } = true;
+        
         public DebugLog(SpriteBatch spriteBatch, SpriteFont font)
         {
             _spriteBatch = spriteBatch;
@@ -27,6 +29,11 @@ namespace Lanpaint
 
         public void DrawLog()
         {
+            if (!ShowLog)
+            {
+                return;
+            }
+            
             var y = 0;
             _logItems.ForEach(x =>
             {

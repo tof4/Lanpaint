@@ -19,7 +19,6 @@ namespace Lanpaint
         private readonly Color _color = RandomColor.GetColor();
         private readonly GraphicsDeviceManager _graphics;
         private KeyboardInput _keyboardInput;
-        private Config _config;
         private DebugLog _debugLog;
         private SpriteBatch _spriteBatch;
 
@@ -38,14 +37,9 @@ namespace Lanpaint
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
             
-            _config = Storage.LoadConfig();
-            _config.DebugMode = true;
-            _config.ConnectToSaved = false;
-            _config.NodesDetection = false;
-
             var rsaDatabase = new RsaDatabase();
             _network = new P2P(
-                _config,
+                Program.Config,
                 rsaDatabase,
                 x => { },
                 new[] { typeof(PixelHandler) }
@@ -61,24 +55,34 @@ namespace Lanpaint
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _debugLog = new DebugLog(_spriteBatch, font);
             Trace.Listeners.Add(new TraceListener(_debugLog));
+            try
+            {
+                _network.Start();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.Message);
+            }
         }
 
         protected override void Update(GameTime gameTime)
         {
             _keyboardInput.UpdateState();
+
             if (_keyboardInput.CheckKey(Keys.F1))
             {
-                _network.Start();
+                _debugLog.ShowLog = !_debugLog.ShowLog;
             }
             else if (_keyboardInput.CheckKey(Keys.F2))
             {
-                _config.StartServer = false;
-                _network.Start();
-                _network.Connect(IPAddress.Loopback);
-            }
-            else if (_keyboardInput.CheckKey(Keys.F3))
-            {
-                _debugLog.ShowLog = !_debugLog.ShowLog;
+                try
+                {
+                    _network.Connect(IPAddress.Loopback);
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e.Message);
+                }
             }
 
             AddPixel();

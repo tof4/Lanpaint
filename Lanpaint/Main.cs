@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using Lanchat.ClientCore;
 using Lanchat.Core.Network;
@@ -16,10 +14,13 @@ namespace Lanpaint
     public class Main : Game
     {
         private static P2P _network;
-        private readonly Color _color = RandomColor.GetColor();
+        private static readonly Color Color = RandomColor.GetColor();
+        private static Texture2D _canvas;
+        private static Rectangle _size;
+        private static Color[] _pixels;
         private readonly GraphicsDeviceManager _graphics;
-        private KeyboardInput _keyboardInput;
         private DebugLog _debugLog;
+        private KeyboardInput _keyboardInput;
         private SpriteBatch _spriteBatch;
 
         public Main()
@@ -29,22 +30,28 @@ namespace Lanpaint
             IsMouseVisible = true;
         }
 
-        public static List<Pixel> Pixels { get; } = new();
-
         protected override void Initialize()
         {
             _graphics.PreferredBackBufferWidth = 1000;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
-            
+
+            _size = GraphicsDevice.PresentationParameters.Bounds;
+            _pixels = new Color[_size.Width * _size.Height];
+
             var rsaDatabase = new RsaDatabase();
             _network = new P2P(
                 Program.Config,
                 rsaDatabase,
-                x => { },
+                _ => { },
                 new[] { typeof(PixelHandler) }
             );
 
+            _canvas = new Texture2D(
+                _graphics.GraphicsDevice, 
+                _size.Width,
+                _size.Height);
+            
             _keyboardInput = new KeyboardInput();
             base.Initialize();
         }
@@ -93,17 +100,29 @@ namespace Lanpaint
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
-            Pixels.ToList().ForEach(DrawPixel);
             _debugLog.DrawLog();
+            _canvas.SetData(_pixels, 0, _size.Width * _size.Height);
+            _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _size.Width, _size.Height), Color.White);
             _spriteBatch.End();
             base.Draw(gameTime);
         }
 
+        public static void DrawPixel(Pixel pixel)
+        {
+            for (var x = 0; x < 5; x++)
+            {
+                for (var y = 0; y < 5; y++)
+                {
+                    var index = (pixel.Y+y) * _size.Width + (pixel.X+x);
+                    _pixels[index] = pixel.Color;
+                }
+            }
+        }
+        
         private void AddPixel()
         {
             var mouseState = Mouse.GetState();
-            if (mouseState.LeftButton != ButtonState.Pressed ||
-                Pixels.Any(x => x.X == mouseState.X && x.Y == mouseState.Y))
+            if (mouseState.LeftButton != ButtonState.Pressed)
             {
                 return;
             }
@@ -112,21 +131,10 @@ namespace Lanpaint
             {
                 X = mouseState.X,
                 Y = mouseState.Y,
-                Color = _color
+                Color = Color
             };
-
-            Pixels.Add(draw);
+            DrawPixel(draw);
             _network.Broadcast.SendData(draw);
-        }
-
-        private void DrawPixel(Pixel pixel)
-        {
-            var rect = new Texture2D(_graphics.GraphicsDevice, 5, 5);
-            var data = new Color[5 * 5];
-            for (var i = 0; i < data.Length; ++i) data[i] = pixel.Color;
-            rect.SetData(data);
-            var position = new Vector2(pixel.X, pixel.Y);
-            _spriteBatch.Draw(rect, position, Color.White);
         }
     }
 }

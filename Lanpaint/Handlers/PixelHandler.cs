@@ -5,9 +5,9 @@ namespace Lanpaint.Handlers
 {
     public class PixelHandler : ApiHandler<Pixel>
     {
-        protected override void Handle(Pixel data)
+        protected override void Handle(Pixel pixel)
         {
-            Main.Pixels.Add(data);
+            Main.DrawPixel(pixel);
         }
     }
 }

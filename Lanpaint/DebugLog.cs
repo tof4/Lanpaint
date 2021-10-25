@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -35,7 +36,7 @@ namespace Lanpaint
             }
             
             var y = 0;
-            _logItems.ForEach(x =>
+            _logItems.ToList().ForEach(x =>
             {
                 _spriteBatch.DrawString(_font, x, new Vector2(0, y), Color.Black);
                 y += 20;

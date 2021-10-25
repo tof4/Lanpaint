@@ -24,7 +24,7 @@ namespace Lanpaint.Elements
             }
             
 
-            _spriteBatch.Draw(_texture, new Vector2(298, 0), null, Color.White);
+            _spriteBatch.Draw(_texture, new Vector2(300, 2), null, Color.White);
         }
     }
 }

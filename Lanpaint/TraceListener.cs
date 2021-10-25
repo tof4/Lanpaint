@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Lanpaint.Elements;
 
 namespace Lanpaint
 {

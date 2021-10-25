@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Lanpaint
+namespace Lanpaint.Elements
 {
     public class DebugLog
     {
@@ -11,7 +11,7 @@ namespace Lanpaint
         private readonly SpriteBatch _spriteBatch;
         private readonly SpriteFont _font;
 
-        public bool ShowLog { get; set; } = true;
+        public bool Show { get; set; } = true;
         
         public DebugLog(SpriteBatch spriteBatch, SpriteFont font)
         {
@@ -28,9 +28,9 @@ namespace Lanpaint
             _logItems.Add(message);
         }
 
-        public void DrawLog()
+        public void Draw()
         {
-            if (!ShowLog)
+            if (!Show)
             {
                 return;
             }

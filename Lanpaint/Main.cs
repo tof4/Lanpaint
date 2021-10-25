@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using Lanchat.ClientCore;
 using Lanchat.Core.Network;
+using Lanpaint.Elements;
 using Lanpaint.Handlers;
 using Lanpaint.Models;
 using Microsoft.Xna.Framework;
@@ -20,6 +21,7 @@ namespace Lanpaint
         private static Color[] _pixels;
         private readonly GraphicsDeviceManager _graphics;
         private DebugLog _debugLog;
+        private Board _board;
         private KeyboardInput _keyboardInput;
         private SpriteBatch _spriteBatch;
 
@@ -59,8 +61,12 @@ namespace Lanpaint
         protected override void LoadContent()
         {
             var font = Content.Load<SpriteFont>("DefaultFont");
+            var boardImage = Content.Load<Texture2D>("board");
+
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _debugLog = new DebugLog(_spriteBatch, font);
+            _board = new Board(_spriteBatch, boardImage);
+            
             Trace.Listeners.Add(new TraceListener(_debugLog));
             try
             {
@@ -78,7 +84,7 @@ namespace Lanpaint
 
             if (_keyboardInput.CheckKey(Keys.F1))
             {
-                _debugLog.ShowLog = !_debugLog.ShowLog;
+                _debugLog.Show = !_debugLog.Show;
             }
             else if (_keyboardInput.CheckKey(Keys.F2))
             {
@@ -91,6 +97,10 @@ namespace Lanpaint
                     Trace.WriteLine(e.Message);
                 }
             }
+            else if (_keyboardInput.CheckKey(Keys.F3))
+            {
+                _board.Show = !_board.Show;
+            }
 
             AddPixel();
             base.Update(gameTime);
@@ -100,9 +110,10 @@ namespace Lanpaint
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
-            _debugLog.DrawLog();
             _canvas.SetData(_pixels, 0, _size.Width * _size.Height);
+            _board.Draw();
             _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _size.Width, _size.Height), Color.White);
+            _debugLog.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);
         }
@@ -135,6 +146,11 @@ namespace Lanpaint
             };
             DrawPixel(draw);
             _network.Broadcast.SendData(draw);
+        }
+
+        private void ShowBoard()
+        {
+            
         }
     }
 }

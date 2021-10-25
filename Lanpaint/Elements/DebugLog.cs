@@ -38,7 +38,7 @@ namespace Lanpaint.Elements
             var y = 0;
             _logItems.ToList().ForEach(x =>
             {
-                _spriteBatch.DrawString(_font, x, new Vector2(0, y), Color.Black);
+                _spriteBatch.DrawString(_font, x, new Vector2(0, y), Color.Yellow);
                 y += 20;
             });
         }

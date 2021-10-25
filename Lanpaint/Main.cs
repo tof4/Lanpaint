@@ -50,10 +50,10 @@ namespace Lanpaint
             );
 
             _canvas = new Texture2D(
-                _graphics.GraphicsDevice, 
+                _graphics.GraphicsDevice,
                 _size.Width,
                 _size.Height);
-            
+
             _keyboardInput = new KeyboardInput();
             base.Initialize();
         }
@@ -66,7 +66,7 @@ namespace Lanpaint
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _debugLog = new DebugLog(_spriteBatch, font);
             _board = new Board(_spriteBatch, boardImage);
-            
+
             Trace.Listeners.Add(new TraceListener(_debugLog));
             try
             {
@@ -108,7 +108,7 @@ namespace Lanpaint
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
             _spriteBatch.Begin();
             _canvas.SetData(_pixels, 0, _size.Width * _size.Height);
             _board.Draw();
@@ -120,37 +120,45 @@ namespace Lanpaint
 
         public static void DrawPixel(Pixel pixel)
         {
-            for (var x = 0; x < 5; x++)
+            for (var x = 0; x < pixel.Size; x++)
             {
-                for (var y = 0; y < 5; y++)
+                for (var y = 0; y < pixel.Size; y++)
                 {
-                    var index = (pixel.Y+y) * _size.Width + (pixel.X+x);
-                    _pixels[index] = pixel.Color;
+                    var index = (pixel.Y + y) * _size.Width + (pixel.X + x);
+                    if (index < _pixels.Length)
+                    {
+                        _pixels[index] = pixel.Color;
+                    }
                 }
             }
         }
-        
+
         private void AddPixel()
         {
             var mouseState = Mouse.GetState();
-            if (mouseState.LeftButton != ButtonState.Pressed)
-            {
-                return;
-            }
-
             var draw = new Pixel
             {
                 X = mouseState.X,
                 Y = mouseState.Y,
-                Color = Color
             };
+            
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                draw.Color = Color;
+                draw.Size = 5;
+            }
+            else if (mouseState.RightButton == ButtonState.Pressed)
+            {
+                draw.Color = Color.Transparent;
+                draw.Size = 50;
+            }
+            else
+            {
+                return;
+            }
+
             DrawPixel(draw);
             _network.Broadcast.SendData(draw);
-        }
-
-        private void ShowBoard()
-        {
-            
         }
     }
 }

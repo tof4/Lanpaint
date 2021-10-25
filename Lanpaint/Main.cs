@@ -24,6 +24,7 @@ namespace Lanpaint
         private Board _board;
         private KeyboardInput _keyboardInput;
         private SpriteBatch _spriteBatch;
+        private SpriteFont _font;
 
         public Main()
         {
@@ -60,11 +61,10 @@ namespace Lanpaint
 
         protected override void LoadContent()
         {
-            var font = Content.Load<SpriteFont>("DefaultFont");
             var boardImage = Content.Load<Texture2D>("board");
-
+            _font = Content.Load<SpriteFont>("DefaultFont");
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _debugLog = new DebugLog(_spriteBatch, font);
+            _debugLog = new DebugLog(_spriteBatch, _font);
             _board = new Board(_spriteBatch, boardImage);
 
             Trace.Listeners.Add(new TraceListener(_debugLog));
@@ -88,17 +88,6 @@ namespace Lanpaint
             }
             else if (_keyboardInput.CheckKey(Keys.F2))
             {
-                try
-                {
-                    _network.Connect(IPAddress.Loopback);
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e.Message);
-                }
-            }
-            else if (_keyboardInput.CheckKey(Keys.F3))
-            {
                 _board.Show = !_board.Show;
             }
 
@@ -114,6 +103,9 @@ namespace Lanpaint
             _board.Draw();
             _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _size.Width, _size.Height), Color.White);
             _debugLog.Draw();
+            _spriteBatch.DrawString(_font,
+                "F1 - Show debug log\nF2 - Show board\nLeft mouse - Draw\nRight mouse - Erase ",
+                new Vector2(_size.Width - 160, 10), Color.Yellow);
             _spriteBatch.End();
             base.Draw(gameTime);
         }
@@ -141,7 +133,7 @@ namespace Lanpaint
                 X = mouseState.X,
                 Y = mouseState.Y,
             };
-            
+
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
                 draw.Color = Color;

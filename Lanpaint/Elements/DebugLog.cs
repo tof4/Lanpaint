@@ -11,7 +11,7 @@ namespace Lanpaint.Elements
         private readonly SpriteBatch _spriteBatch;
         private readonly SpriteFont _font;
 
-        public bool Show { get; set; } = true;
+        public bool Show { get; set; }
         
         public DebugLog(SpriteBatch spriteBatch, SpriteFont font)
         {

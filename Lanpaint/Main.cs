@@ -53,10 +53,10 @@ namespace Lanpaint
             var board = Content.Load<Texture2D>("board");
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _debugLog = new DebugLog(_spriteBatch, defaultFont);
-            _chat = new Chat(_spriteBatch, Window, _network, defaultFont, _size);
+            _debugLog = new DebugLog(_spriteBatch, defaultFont, GraphicsDevice, _size);
+            _chat = new Chat(_spriteBatch, Window, _network, defaultFont, _size, GraphicsDevice);
             _paperSoccer = new PaperSoccer(_spriteBatch, board);
-            _keyboardInput = new KeyboardInput(_debugLog, _paperSoccer);
+            _keyboardInput = new KeyboardInput(_chat, _debugLog, _paperSoccer);
             Canvas = new Canvas(_spriteBatch, GraphicsDevice, _network, _size);
 
             Trace.Listeners.Add(new TraceListener(_debugLog));
@@ -80,7 +80,7 @@ namespace Lanpaint
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             _paperSoccer.Draw();
             Canvas.Draw();

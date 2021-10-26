@@ -14,26 +14,36 @@ namespace Lanpaint.Elements
         private readonly IP2P _network;
         private readonly Rectangle _size;
         private readonly SpriteBatch _spriteBatch;
+        private readonly Texture2D _background;
         private string _textInputBuffer;
+
+        public bool Show { get; set; } = true;
 
         public Chat(
             SpriteBatch spriteBatch,
             GameWindow window,
             IP2P network,
             SpriteFont font,
-            Rectangle size)
+            Rectangle size,
+            GraphicsDevice graphicsDevice)
         {
             _spriteBatch = spriteBatch;
             _network = network;
             _font = font;
             _size = size;
             window.TextInput += GameWindowOnTextInput;
+            _background = new Texture2D(graphicsDevice, 1, 1);
+            _background.SetData(new[] { Color.White });
         }
 
         public void Draw()
         {
+            if (!Show) return;
+
+            _spriteBatch.Draw(_background, new Rectangle(0, 295, _size.Width, 305), new Color(Color.Black, 0.5f));
+
             var y = 40;
-            _chatHistory.ToList().ForEach(x =>
+            Enumerable.Reverse(_chatHistory).ToList().ForEach(x =>
             {
                 _spriteBatch.DrawString(_font, x, new Vector2(5, _size.Bottom - y), Color.White);
                 y += 20;
@@ -61,12 +71,10 @@ namespace Lanpaint.Elements
                     AddMessage(Program.Config.Nickname, _textInputBuffer);
                     _textInputBuffer = string.Empty;
                     return;
-                
+
                 case Keys.Back:
                     if (!string.IsNullOrEmpty(_textInputBuffer))
-                    {
                         _textInputBuffer = _textInputBuffer.Remove(_textInputBuffer.Length - 1);
-                    }
                     return;
 
                 case Keys.Tab:
@@ -83,7 +91,8 @@ namespace Lanpaint.Elements
 
         private void AddMessage(string nickname, string content)
         {
-            _chatHistory.Insert(0, $"{nickname}: {content}");
+            if (_chatHistory.Count == 14) _chatHistory.RemoveAt(0);
+            _chatHistory.Add($"{nickname}: {content}");
         }
     }
 }

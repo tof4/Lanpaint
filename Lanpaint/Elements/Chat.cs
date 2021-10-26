@@ -31,9 +31,15 @@ namespace Lanpaint.Elements
             _network = network;
             _font = font;
             _size = size;
-            window.TextInput += GameWindowOnTextInput;
             _background = new Texture2D(graphicsDevice, 1, 1);
             _background.SetData(new[] { Color.White });
+            window.TextInput += GameWindowOnTextInput;
+
+            _chatHistory.Add("F1 - Chat");
+            _chatHistory.Add("F2 - Paper soccer board");
+            _chatHistory.Add("F3 - Debug log");
+            _chatHistory.Add("Left mouse button - draw");
+            _chatHistory.Add("Right mouse button - erase");
         }
 
         public void Draw()
@@ -48,7 +54,7 @@ namespace Lanpaint.Elements
                 _spriteBatch.DrawString(_font, x, new Vector2(5, _size.Bottom - y), Color.White);
                 y += 20;
             });
-
+            
             _spriteBatch.DrawString(_font,
                 _textInputBuffer == null
                     ? $"{Program.Config.Nickname}: "

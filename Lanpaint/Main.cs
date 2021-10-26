@@ -23,8 +23,9 @@ namespace Lanpaint
         private DebugLog _debugLog;
         private Board _board;
         private KeyboardInput _keyboardInput;
+        private Chat _chat;
         private SpriteBatch _spriteBatch;
-        private SpriteFont _font;
+        private Drawing _drawing;
 
         public Main()
         {
@@ -46,7 +47,10 @@ namespace Lanpaint
             _network = new P2P(
                 Program.Config,
                 rsaDatabase,
-                _ => { },
+                x =>
+                {
+                    x.Instance.Messaging.MessageReceived += _chat.MessagingOnMessageReceived;
+                },
                 new[] { typeof(PixelHandler) }
             );
 
@@ -59,13 +63,17 @@ namespace Lanpaint
             base.Initialize();
         }
 
+
         protected override void LoadContent()
         {
             var boardImage = Content.Load<Texture2D>("board");
-            _font = Content.Load<SpriteFont>("DefaultFont");
+            var font = Content.Load<SpriteFont>("DefaultFont");
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _debugLog = new DebugLog(_spriteBatch, _font);
+            _debugLog = new DebugLog(_spriteBatch, font);
             _board = new Board(_spriteBatch, boardImage);
+
+            _drawing = new Drawing(_spriteBatch, font, _size);
+            _chat = new Chat(Window, _drawing, _network);
 
             Trace.Listeners.Add(new TraceListener(_debugLog));
             try
@@ -99,13 +107,11 @@ namespace Lanpaint
         {
             GraphicsDevice.Clear(Color.Black);
             _spriteBatch.Begin();
-            _canvas.SetData(_pixels, 0, _size.Width * _size.Height);
+            _canvas.SetData(_pixels, 0, _drawing.Size.Width * _drawing.Size.Height);
             _board.Draw();
-            _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _size.Width, _size.Height), Color.White);
+            _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _drawing.Size.Width, _drawing.Size.Height), Color.White);
+            _chat.Draw();
             _debugLog.Draw();
-            _spriteBatch.DrawString(_font,
-                "F1 - Show debug log\nF2 - Show board\nLeft mouse - Draw\nRight mouse - Erase ",
-                new Vector2(_size.Width - 160, 10), Color.Yellow);
             _spriteBatch.End();
             base.Draw(gameTime);
         }

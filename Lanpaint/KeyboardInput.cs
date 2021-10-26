@@ -6,7 +6,7 @@ namespace Lanpaint
     {
         private KeyboardState _previousState;
         private KeyboardState _currentState;
-
+        
         public void UpdateState()
         {
             _previousState = _currentState;
@@ -15,8 +15,7 @@ namespace Lanpaint
         
         public bool CheckKey(Keys key)
         {
-            var result =  _currentState.IsKeyDown(key) && !_previousState.IsKeyDown(key);
-            return result;
+            return _currentState.IsKeyDown(key) && !_previousState.IsKeyDown(key);
         }
     }
 }

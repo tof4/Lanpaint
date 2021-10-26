@@ -26,11 +26,11 @@ namespace Lanpaint
             if (CheckKey(Keys.F1))
                 _chat.Show = !_chat.Show;
             
-            else if (CheckKey(Keys.F2))
-                _debugLog.Show = !_debugLog.Show;
-            
-            else if (CheckKey(Keys.F3)) 
+            else if (CheckKey(Keys.F2)) 
                 _paperSoccer.Show = !_paperSoccer.Show;
+            
+            else if (CheckKey(Keys.F3))
+                _debugLog.Show = !_debugLog.Show;
         }
 
         private bool CheckKey(Keys key)

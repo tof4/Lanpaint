@@ -112,12 +112,14 @@ namespace Lanpaint
 
         public static void DrawPixel(Pixel pixel)
         {
-            for (var x = 0; x < pixel.Size; x++)
+            var offset = pixel.Size / 2;
+
+            for (var x = 0 - offset; x < offset; x++)
             {
-                for (var y = 0; y < pixel.Size; y++)
+                for (var y = 0 - offset; y < offset; y++)
                 {
                     var index = (pixel.Y + y) * _size.Width + (pixel.X + x);
-                    if (index < _pixels.Length)
+                    if (index >= 0 && index < _pixels.Length)
                     {
                         _pixels[index] = pixel.Color;
                     }
@@ -142,7 +144,7 @@ namespace Lanpaint
             else if (mouseState.RightButton == ButtonState.Pressed)
             {
                 draw.Color = Color.Transparent;
-                draw.Size = 50;
+                draw.Size = 20;
             }
             else
             {

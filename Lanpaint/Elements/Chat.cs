@@ -50,15 +50,28 @@ namespace Lanpaint.Elements
 
         private void GameWindowOnTextInput(object sender, TextInputEventArgs e)
         {
-            if (e.Key != Keys.Enter)
+            switch (e.Key)
             {
-                _textInputBuffer += e.Character;
-                return;
-            }
+                case Keys.Enter:
+                    _network.Broadcast.SendMessage(_textInputBuffer);
+                    _chatHistory.Insert(0, _textInputBuffer);
+                    _textInputBuffer = string.Empty;
+                    return;
+                
+                case Keys.Back when !string.IsNullOrEmpty(_textInputBuffer):
+                    _textInputBuffer = _textInputBuffer.Remove(_textInputBuffer.Length - 1);
+                    return;
 
-            _network.Broadcast.SendMessage(_textInputBuffer);
-            _chatHistory.Insert(0, _textInputBuffer);
-            _textInputBuffer = string.Empty;
+                case Keys.Tab:
+                    return;
+                
+                case Keys.Delete:
+                    return;
+                
+                default:
+                    _textInputBuffer += e.Character;
+                    break;
+            }
         }
     }
 }

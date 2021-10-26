@@ -14,12 +14,13 @@ namespace Lanpaint
         private readonly GraphicsDeviceManager _graphics;
         private P2P _network;
         private Rectangle _size;
-        private Canvas _canvas;
         private Chat _chat;
         private DebugLog _debugLog;
         private KeyboardInput _keyboardInput;
         private PaperSoccer _paperSoccer;
         private SpriteBatch _spriteBatch;
+
+        public static Canvas Canvas { get; private set; }
 
         public Main()
         {
@@ -33,18 +34,15 @@ namespace Lanpaint
             _graphics.PreferredBackBufferWidth = 1000;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
-
             _size = GraphicsDevice.PresentationParameters.Bounds;
 
-            var rsaDatabase = new RsaDatabase();
             _network = new P2P(
                 Program.Config,
-                rsaDatabase,
+                new RsaDatabase(),
                 x => { x.Instance.Messaging.MessageReceived += _chat.MessagingOnMessageReceived; },
                 new[] { typeof(PixelHandler) }
             );
-
-
+            
             base.Initialize();
         }
 
@@ -59,7 +57,7 @@ namespace Lanpaint
             _chat = new Chat(_spriteBatch, Window, _network, defaultFont, _size);
             _paperSoccer = new PaperSoccer(_spriteBatch, board);
             _keyboardInput = new KeyboardInput(_debugLog, _paperSoccer);
-            _canvas = new Canvas(_spriteBatch, GraphicsDevice, _network, _size);
+            Canvas = new Canvas(_spriteBatch, GraphicsDevice, _network, _size);
 
             Trace.Listeners.Add(new TraceListener(_debugLog));
 
@@ -76,7 +74,7 @@ namespace Lanpaint
         protected override void Update(GameTime gameTime)
         {
             _keyboardInput.Update();
-            _canvas.Update();
+            Canvas.Update();
             base.Update(gameTime);
         }
 
@@ -85,7 +83,7 @@ namespace Lanpaint
             GraphicsDevice.Clear(Color.Black);
             _spriteBatch.Begin();
             _paperSoccer.Draw();
-            _canvas.Draw();
+            Canvas.Draw();
             _chat.Draw();
             _debugLog.Draw();
             _spriteBatch.End();

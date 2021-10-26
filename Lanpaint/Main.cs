@@ -1,31 +1,25 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net;
 using Lanchat.ClientCore;
 using Lanchat.Core.Network;
 using Lanpaint.Elements;
 using Lanpaint.Handlers;
-using Lanpaint.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace Lanpaint
 {
     public class Main : Game
     {
-        private static P2P _network;
-        private static readonly Color Color = RandomColor.GetColor();
-        private static Texture2D _canvas;
-        private static Rectangle _size;
-        private static Color[] _pixels;
         private readonly GraphicsDeviceManager _graphics;
-        private DebugLog _debugLog;
-        private Board _board;
-        private KeyboardInput _keyboardInput;
+        private P2P _network;
+        private Rectangle _size;
+        private Canvas _canvas;
         private Chat _chat;
+        private DebugLog _debugLog;
+        private KeyboardInput _keyboardInput;
+        private PaperSoccer _paperSoccer;
         private SpriteBatch _spriteBatch;
-        private Drawing _drawing;
 
         public Main()
         {
@@ -41,41 +35,34 @@ namespace Lanpaint
             _graphics.ApplyChanges();
 
             _size = GraphicsDevice.PresentationParameters.Bounds;
-            _pixels = new Color[_size.Width * _size.Height];
 
             var rsaDatabase = new RsaDatabase();
             _network = new P2P(
                 Program.Config,
                 rsaDatabase,
-                x =>
-                {
-                    x.Instance.Messaging.MessageReceived += _chat.MessagingOnMessageReceived;
-                },
+                x => { x.Instance.Messaging.MessageReceived += _chat.MessagingOnMessageReceived; },
                 new[] { typeof(PixelHandler) }
             );
 
-            _canvas = new Texture2D(
-                _graphics.GraphicsDevice,
-                _size.Width,
-                _size.Height);
 
-            _keyboardInput = new KeyboardInput();
             base.Initialize();
         }
 
 
         protected override void LoadContent()
         {
-            var boardImage = Content.Load<Texture2D>("board");
-            var font = Content.Load<SpriteFont>("DefaultFont");
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _debugLog = new DebugLog(_spriteBatch, font);
-            _board = new Board(_spriteBatch, boardImage);
+            var defaultFont = Content.Load<SpriteFont>("DefaultFont");
+            var board = Content.Load<Texture2D>("board");
 
-            _drawing = new Drawing(_spriteBatch, font, _size);
-            _chat = new Chat(Window, _drawing, _network);
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _debugLog = new DebugLog(_spriteBatch, defaultFont);
+            _chat = new Chat(_spriteBatch, Window, _network, defaultFont, _size);
+            _paperSoccer = new PaperSoccer(_spriteBatch, board);
+            _keyboardInput = new KeyboardInput(_debugLog, _paperSoccer);
+            _canvas = new Canvas(_spriteBatch, GraphicsDevice, _network, _size);
 
             Trace.Listeners.Add(new TraceListener(_debugLog));
+
             try
             {
                 _network.Start();
@@ -88,18 +75,8 @@ namespace Lanpaint
 
         protected override void Update(GameTime gameTime)
         {
-            _keyboardInput.UpdateState();
-
-            if (_keyboardInput.CheckKey(Keys.F1))
-            {
-                _debugLog.Show = !_debugLog.Show;
-            }
-            else if (_keyboardInput.CheckKey(Keys.F2))
-            {
-                _board.Show = !_board.Show;
-            }
-
-            AddPixel();
+            _keyboardInput.Update();
+            _canvas.Update();
             base.Update(gameTime);
         }
 
@@ -107,58 +84,12 @@ namespace Lanpaint
         {
             GraphicsDevice.Clear(Color.Black);
             _spriteBatch.Begin();
-            _canvas.SetData(_pixels, 0, _drawing.Size.Width * _drawing.Size.Height);
-            _board.Draw();
-            _spriteBatch.Draw(_canvas, new Rectangle(0, 0, _drawing.Size.Width, _drawing.Size.Height), Color.White);
+            _paperSoccer.Draw();
+            _canvas.Draw();
             _chat.Draw();
             _debugLog.Draw();
             _spriteBatch.End();
             base.Draw(gameTime);
-        }
-
-        public static void DrawPixel(Pixel pixel)
-        {
-            var offset = pixel.Size / 2;
-
-            for (var x = 0 - offset; x < offset; x++)
-            {
-                for (var y = 0 - offset; y < offset; y++)
-                {
-                    var index = (pixel.Y + y) * _size.Width + (pixel.X + x);
-                    if (index >= 0 && index < _pixels.Length)
-                    {
-                        _pixels[index] = pixel.Color;
-                    }
-                }
-            }
-        }
-
-        private void AddPixel()
-        {
-            var mouseState = Mouse.GetState();
-            var draw = new Pixel
-            {
-                X = mouseState.X,
-                Y = mouseState.Y,
-            };
-
-            if (mouseState.LeftButton == ButtonState.Pressed)
-            {
-                draw.Color = Color;
-                draw.Size = 5;
-            }
-            else if (mouseState.RightButton == ButtonState.Pressed)
-            {
-                draw.Color = Color.Transparent;
-                draw.Size = 20;
-            }
-            else
-            {
-                return;
-            }
-
-            DrawPixel(draw);
-            _network.Broadcast.SendData(draw);
         }
     }
 }

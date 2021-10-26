@@ -11,7 +11,7 @@ namespace Lanpaint
         {
             _debugLog = debugLog;
         }
-        
+
         public override void WriteLine(string message)
         {
             _debugLog.AddToLog(message);

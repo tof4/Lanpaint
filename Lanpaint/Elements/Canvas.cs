@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Lanchat.Core.Network;
 using Lanpaint.Models;
 using Microsoft.Xna.Framework;
@@ -15,6 +16,9 @@ namespace Lanpaint.Elements
         private readonly Color[] _pixels;
         private readonly Rectangle _size;
         private readonly SpriteBatch _spriteBatch;
+
+        private Point _previousPosition;
+        private bool _hold;
 
         public Canvas(
             SpriteBatch spriteBatch,
@@ -34,7 +38,7 @@ namespace Lanpaint.Elements
         public void Update()
         {
             var mouseState = Mouse.GetState();
-            var draw = new Pixel
+            var newPixel = new Pixel
             {
                 X = mouseState.X,
                 Y = mouseState.Y
@@ -42,21 +46,48 @@ namespace Lanpaint.Elements
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
-                draw.Color = _brushColor;
-                draw.Size = 5;
+                newPixel.Color = _brushColor;
+                newPixel.Size = 5;
             }
             else if (mouseState.RightButton == ButtonState.Pressed)
             {
-                draw.Color = Color.Transparent;
-                draw.Size = 20;
+                newPixel.Color = Color.Transparent;
+                newPixel.Size = 20;
             }
             else
             {
+                _hold = false;
                 return;
             }
 
-            AddPixel(draw);
-            _network.Broadcast.SendData(draw);
+            var pixels = new List<Pixel>();
+            if (_hold)
+            {
+                foreach (var (x, y) in Tools.GetPointsOnLine(
+                    newPixel.X, 
+                    newPixel.Y, 
+                    _previousPosition.X,
+                    _previousPosition.Y))
+                {
+                    pixels.Add(new Pixel
+                    {
+                        X = x,
+                        Y = y,
+                        Color = newPixel.Color,
+                        Size = newPixel.Size
+                    });
+                }
+            }
+
+            pixels.Add(newPixel);
+            pixels.ForEach(x =>
+            {
+                AddPixel(x);
+                _network.Broadcast.SendData(x);
+            });
+
+            _hold = true;
+            _previousPosition = mouseState.Position;
         }
 
         public void Draw()

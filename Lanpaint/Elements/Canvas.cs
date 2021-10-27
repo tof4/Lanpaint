@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Lanchat.Core.Network;
 using Lanpaint.Models;
 using Microsoft.Xna.Framework;
@@ -61,11 +62,12 @@ namespace Lanpaint.Elements
             }
 
             var pixels = new List<Pixel>();
-            if (_hold)
+            if (_hold && PointsAreDifferent(mouseState.Position))
             {
+                Trace.WriteLine($"{mouseState.Position.X}{mouseState.Position.Y}");
                 foreach (var (x, y) in Tools.GetPointsOnLine(
-                    newPixel.X, 
-                    newPixel.Y, 
+                    newPixel.X,
+                    newPixel.Y,
                     _previousPosition.X,
                     _previousPosition.Y))
                 {
@@ -105,6 +107,12 @@ namespace Lanpaint.Elements
                 var index = (pixel.Y + y) * _size.Width + pixel.X + x;
                 if (index >= 0 && index < _pixels.Length) _pixels[index] = pixel.Color;
             }
+        }
+
+        private bool PointsAreDifferent(Point newPoint)
+        {
+            var (x, y) = newPoint;
+            return x - _previousPosition.X != 0 || y - _previousPosition.Y != 0;
         }
     }
 }

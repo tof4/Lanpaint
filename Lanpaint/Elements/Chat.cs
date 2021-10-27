@@ -61,13 +61,13 @@ namespace Lanpaint.Elements
                     : $"{Program.Config.Nickname}: {_textInputBuffer}",
                 new Vector2(5, _size.Bottom - 20), Color.White);
         }
-
-        public void MessagingOnMessageReceived(object sender, string e)
+        
+        public void AddMessage(string nickname, string content)
         {
-            var node = (INode)sender;
-            AddMessage(node.User.Nickname, e);
+            if (_chatHistory.Count == 14) _chatHistory.RemoveAt(0);
+            _chatHistory.Add($"{nickname}: {content}");
         }
-
+        
         private void GameWindowOnTextInput(object sender, TextInputEventArgs e)
         {
             switch (e.Key)
@@ -93,12 +93,6 @@ namespace Lanpaint.Elements
                     _textInputBuffer += e.Character;
                     break;
             }
-        }
-
-        private void AddMessage(string nickname, string content)
-        {
-            if (_chatHistory.Count == 14) _chatHistory.RemoveAt(0);
-            _chatHistory.Add($"{nickname}: {content}");
         }
     }
 }

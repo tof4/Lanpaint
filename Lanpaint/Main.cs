@@ -39,10 +39,16 @@ namespace Lanpaint
             _network = new P2P(
                 Program.Config,
                 new RsaDatabase(),
-                x => { x.Instance.Messaging.MessageReceived += _chat.MessagingOnMessageReceived; },
+                x =>
+                {
+                    x.Instance.Messaging.MessageReceived += (_, s) =>
+                    {
+                        _chat.AddMessage(x.Instance.User.Nickname, s);
+                    };
+                },
                 new[] { typeof(PixelHandler) }
             );
-            
+
             base.Initialize();
         }
 

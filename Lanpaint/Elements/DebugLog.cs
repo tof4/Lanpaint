@@ -39,11 +39,11 @@ namespace Lanpaint.Elements
             if (!Show) return;
             
             var y = 0;
-            _spriteBatch.Draw(_background, new Rectangle(0, y, _size.Width, 20), Color.Black);
+            _spriteBatch.Draw(_background, new Rectangle(0, y, _size.Width, 5), new Color(Color.Black, 0.5f));
             y = 5;
             _logItems.ToList().ForEach(x =>
             {
-                _spriteBatch.Draw(_background, new Rectangle(0, y, _size.Width, 20), Color.Black);
+                _spriteBatch.Draw(_background, new Rectangle(0, y, _size.Width, 20), new Color(Color.Black, 0.5f));
                 _spriteBatch.DrawString(_font, x, new Vector2(5, y), Color.White);
                 y += 20;
             });

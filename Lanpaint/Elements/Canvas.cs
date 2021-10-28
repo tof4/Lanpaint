@@ -25,15 +25,14 @@ namespace Lanpaint.Elements
             SpriteBatch spriteBatch,
             GraphicsDevice graphicsDevice,
             IP2P network,
-            Rectangle size)
+            Rectangle size, Color brushColor)
         {
             _spriteBatch = spriteBatch;
             _network = network;
             _size = size;
+            _brushColor = brushColor;
             _pixels = new Color[_size.Width * _size.Height];
             _canvasTexture = new Texture2D(graphicsDevice, _size.Width, _size.Height);
-            var random = new Random();
-            _brushColor = new Color(random.Next(256), random.Next(256), random.Next(256));
         }
 
         public void Update()
@@ -48,7 +47,7 @@ namespace Lanpaint.Elements
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
                 newPixel.Color = _brushColor;
-                newPixel.Size = 5;
+                newPixel.Size = 6;
             }
             else if (mouseState.RightButton == ButtonState.Pressed)
             {

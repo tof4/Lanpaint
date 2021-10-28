@@ -1,7 +1,7 @@
 using Lanpaint.Elements;
 using Microsoft.Xna.Framework.Input;
 
-namespace Lanpaint
+namespace Lanpaint.Inputs
 {
     public class KeyboardInput
     {

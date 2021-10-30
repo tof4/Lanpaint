@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Lanchat.Core.Network;
 using Lanpaint.Models;
 using Microsoft.Xna.Framework;
@@ -63,7 +61,6 @@ namespace Lanpaint.Elements
             var pixels = new List<Pixel>();
             if (_hold && PointsAreDifferent(mouseState.Position))
             {
-                Trace.WriteLine($"{mouseState.Position.X}{mouseState.Position.Y}");
                 foreach (var (x, y) in Tools.GetPointsOnLine(
                     newPixel.X,
                     newPixel.Y,

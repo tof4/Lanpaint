@@ -57,8 +57,8 @@ namespace Lanpaint.Elements
             
             _spriteBatch.DrawString(_font,
                 _textInputBuffer == null
-                    ? $"{Program.Config.Nickname}: "
-                    : $"{Program.Config.Nickname}: {_textInputBuffer}",
+                    ? $"{Program.Storage.Config.Nickname}: "
+                    : $"{Program.Storage.Config.Nickname}: {_textInputBuffer}",
                 new Vector2(5, _size.Bottom - 20), Color.White);
         }
         
@@ -74,7 +74,7 @@ namespace Lanpaint.Elements
             {
                 case Keys.Enter when !string.IsNullOrWhiteSpace(_textInputBuffer):
                     _network.Broadcast.SendMessage(_textInputBuffer);
-                    AddMessage(Program.Config.Nickname, _textInputBuffer);
+                    AddMessage(Program.Storage.Config.Nickname, _textInputBuffer);
                     _textInputBuffer = string.Empty;
                     return;
 

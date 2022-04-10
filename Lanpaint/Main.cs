@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Lanchat.ClientCore;
+using Lanchat.Core.FileSystem;
 using Lanchat.Core.Network;
 using Lanpaint.Elements;
 using Lanpaint.Handlers;
@@ -40,15 +41,10 @@ namespace Lanpaint
             _size = GraphicsDevice.PresentationParameters.Bounds;
 
             _network = new P2P(
-                Program.Config,
-                new RsaDatabase(),
-                x =>
-                {
-                    x.Instance.Messaging.MessageReceived += (_, s) =>
-                    {
-                        _chat.AddMessage(x.Instance.User.Nickname, s);
-                    };
-                },
+                Program.Storage,
+                Program.Storage.Config,
+                new NodesDatabase(),
+                x => x.Instance.Messaging.MessageReceived += (_, s) => _chat.AddMessage(x.Instance.User.Nickname, s),
                 new[] { typeof(PixelHandler) }
             );
 
